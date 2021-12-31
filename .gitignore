@@ -1,0 +1,23 @@
+# use glob syntax.
+syntax: glob
+
+*.elc
+*.pyc
+*~
+.vscode
+.tox
+.coverage
+htmlcov
+
+syntax: regexp
+^\.project$
+syntax: regexp
+^\.gitignore$
+syntax: regexp
+^\.pydevproject$
+syntax: regexp
+^\.gitignore$
+^docs/_build
+^\.gitignore$
+^media
+

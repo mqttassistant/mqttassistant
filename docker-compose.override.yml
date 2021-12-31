@@ -1,0 +1,6 @@
+version: '3'
+
+services:
+  server:
+    ports:
+      - "0.0.0.0:8000:8000/tcp"
