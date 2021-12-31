@@ -11,7 +11,7 @@ def main():
         try:
             app.start()
         except KeyboardInterrupt:
-            print()
+            app.stop()
             exit(0)
         # Wait a little before restarting app
         time.sleep(5)
