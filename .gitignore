@@ -21,4 +21,6 @@ syntax: regexp
 ^\.gitignore$
 ^media
 
+# npm
 node_modules
+dist
