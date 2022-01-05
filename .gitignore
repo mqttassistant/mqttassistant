@@ -21,3 +21,4 @@ syntax: regexp
 ^\.gitignore$
 ^media
 
+node_modules
