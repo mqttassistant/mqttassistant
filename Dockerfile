@@ -15,4 +15,4 @@ RUN mv /docker/mqttassistant /usr/local/bin/
 COPY mqttassistant /usr/local/lib/python3.10/mqttassistant
 
 ENTRYPOINT ["/docker/entrypoint.sh"]
-CMD [ "mqttassistant" ]
+CMD [ "mqttassistant", "--web-port", "80" ]
