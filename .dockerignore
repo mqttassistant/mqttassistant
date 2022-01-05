@@ -1,5 +1,5 @@
-mqttassistant/__pycache__
+**/__pycache__
 
 # npm
-node_modules
-dist
+ui/node_modules
+ui/dist
