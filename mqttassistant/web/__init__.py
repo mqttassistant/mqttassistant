@@ -6,6 +6,7 @@ from fastapi.routing import APIRoute
 from hypercorn.asyncio import serve
 from hypercorn.config import Config
 from . import root
+from . import healthz
 from ..log import get_logger
 
 
@@ -14,6 +15,7 @@ class App(FastAPI):
         module_path = os.path.dirname(os.path.realpath(__file__))
         super().__init__(routes=[
             APIRoute('/', root.home),
+            APIRoute('/healthz', healthz.main),
         ])
         self.templates = Jinja2Templates(directory=os.path.join(module_path, 'templates'))
 
