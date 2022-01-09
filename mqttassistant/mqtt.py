@@ -32,7 +32,7 @@ class Mqtt:
         self.client = self.get_client()
         self.connect_parameters = self.get_connect_parameters()
         # Discovery
-        self.discovery_topic_re = re.compile('^{}\/(\w+)\/(\w+)\/(\w+)\/config$'.format(self.discovery_topic))
+        self.discovery_topic_re = re.compile(r'^{}/(?P<component>\w+)/(?:(?P<node_id>[a-zA-Z0-9_-]+)/)?(?P<object_id>[a-zA-Z0-9_-]+)/config$'.format(self.discovery_topic))
         self.discovery_message = dict()
         self.reload_scheduled = False
 
