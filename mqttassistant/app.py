@@ -20,9 +20,12 @@ class Application:
         self.loop.run_until_complete(self.running)
 
     async def run(self):
-        await self.web.start()
+        # Web server
+        self.web_task = self.web.run()
+        self.loop.create_task(self.web_task)
 
     async def stop(self):
+        self.log.info('stopping')
         await self.web.stop()
         self.running.set_result(False)
         self.log.info('stopped')

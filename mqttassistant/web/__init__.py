@@ -1,6 +1,5 @@
 import asyncio
 import os
-import signal
 from fastapi import FastAPI
 from fastapi.templating import Jinja2Templates
 from fastapi.routing import APIRoute
@@ -34,20 +33,12 @@ class Server:
         self.config.access_log_format = '%(h)s %(l)s %(l)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s" %(L)s'
         self.app = App()
 
-    def shutdown_signal_handler(self, *args) -> None:
-            self.shutdown_event.set()
-
-    async def start(self, logger=None):
-        loop = asyncio.get_event_loop()
-        loop.add_signal_handler(signal.SIGTERM, self.shutdown_signal_handler)
-        self.task = asyncio.create_task(
-            serve(
-                self.app,
-                self.config,
-                shutdown_trigger=self.shutdown_event.wait,
-            )
+    def run(self):
+        return serve(
+            self.app,
+            self.config,
+            shutdown_trigger=self.shutdown_event.wait,
         )
 
-    async def stop(self, logger=None):
-        self.task.cancel()
+    async def stop(self):
         self.log.info('stopped')
