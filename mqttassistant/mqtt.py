@@ -19,14 +19,14 @@ class Mqtt:
     def __init__(self, **config):
         self.log = get_logger('Mqtt')
         # Config
-        self.name = config.get('name', 'mqttassistant')
-        self.keep_alive = config.get('keep_alive', 5)
+        self.name = config.get('mqtt_name', 'mqttassistant')
+        self.host = config.get('mqtt_host', 'localhost')
+        self.port = config.get('mqtt_port', 1883)
+        self.username = config.get('mqtt_username', '')
+        self.password = config.get('mqtt_password', '')
+        self.keep_alive = config.get('mqtt_keep_alive', 5)
+        self.client_id = self.name
         self.last_will_topic = '{}/state'.format(self.name)
-        self.host = config.get('host', 'localhost')
-        self.port = config.get('port', 1883)
-        self.client_id = config.get('client_id', self.name)
-        self.username = config.get('username', None)
-        self.password = config.get('password', None)
         self.client = self.get_client()
         self.connect_parameters = self.get_connect_parameters()
 
