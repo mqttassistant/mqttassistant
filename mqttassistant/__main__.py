@@ -11,6 +11,7 @@ MQTT_USERNAME = os.getenv('MQTT_USERNAME', '')
 MQTT_PASSWORD = os.getenv('MQTT_PASSWORD', '')
 MQTT_NAME = os.getenv('MQTT_NAME', 'mqttassistant')
 MQTT_KEEP_ALIVE = int(os.getenv('MQTT_KEEP_ALIVE', '5'))
+MQTT_DISCOVERY_TOPIC = os.getenv('MQTT_DISCOVERY_TOPIC', 'homeassistant')
 
 
 def main():
@@ -23,6 +24,7 @@ def main():
     parser.add_argument('--mqtt-password', default=MQTT_PASSWORD)
     parser.add_argument('--mqtt-name', default=MQTT_NAME)
     parser.add_argument('--mqtt-keep-alive', default=MQTT_KEEP_ALIVE)
+    parser.add_argument('--mqtt-discovery-topic', default=MQTT_DISCOVERY_TOPIC)
     kwargs = vars(parser.parse_args())
     app = Application(**kwargs)
     app.start()

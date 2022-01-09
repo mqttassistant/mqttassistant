@@ -1,4 +1,5 @@
 import asyncio
+import re
 from amqtt import client
 from .log import get_logger
 
@@ -25,10 +26,15 @@ class Mqtt:
         self.username = config.get('mqtt_username', '')
         self.password = config.get('mqtt_password', '')
         self.keep_alive = config.get('mqtt_keep_alive', 5)
+        self.discovery_topic = config.get('mqtt_discovery_topic', 'homeassistant')
         self.client_id = self.name
         self.last_will_topic = '{}/state'.format(self.name)
         self.client = self.get_client()
         self.connect_parameters = self.get_connect_parameters()
+        # Discovery
+        self.discovery_topic_re = re.compile('^{}\/(\w+)\/(\w+)\/(\w+)\/config$'.format(self.discovery_topic))
+        self.discovery_message = dict()
+        self.reload_scheduled = False
 
     def get_client(self):
         return MQTTClient(
@@ -79,8 +85,8 @@ class Mqtt:
     async def on_connect(self):
         await self.client.publish(self.last_will_topic, b'online')
         # Subscribe
-        # topic = 'topic_name'
-        # await self.client.subscribe([(topic, 2)])
+        discovery_topic = '{}/#'.format(self.discovery_topic)
+        await self.client.subscribe([(discovery_topic, 2)])
         self.log.info('Connected')
 
     def _on_message(self, topic, payload, retained):
@@ -90,7 +96,6 @@ class Mqtt:
         while True:
             try:
                 message = await self.client.deliver_message()
-                print(message)
                 if message:
                     packet = message.publish_packet
                     topic = packet.variable_header.topic_name
@@ -101,3 +106,24 @@ class Mqtt:
 
     async def on_message(self, topic, payload):
         self.log.debug('message received: {} {}'.format(topic, payload))
+        # Discovery topic
+        match = self.discovery_topic_re.match(topic)
+        if match:
+            await self.on_discovery_message(topic, payload)
+
+    async def on_discovery_message(self, topic, payload):
+        if payload:
+            self.discovery_message[topic] = payload
+        else:
+            del self.discovery_message[topic]
+        await self.schedule_reload()
+
+    async def schedule_reload(self):
+        if not self.reload_scheduled:
+            self.reload_scheduled = True
+            loop = asyncio.get_event_loop()
+            loop.call_later(0.2, self.reload_config)
+
+    def reload_config(self):
+        self.reload_scheduled = False
+        self.log.info('Configuration reloaded')
