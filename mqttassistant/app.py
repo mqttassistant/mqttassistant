@@ -2,12 +2,15 @@ import asyncio
 import signal
 from .log import get_logger
 from . import web
+from . import mqtt
 
 
 class Application:
     def __init__(self, **kwargs):
         self.log = get_logger('App')
         self.running = asyncio.Future()
+        # Mqtt client
+        self.mqtt = mqtt.Mqtt(**kwargs)
         # Web server
         self.web = web.Server(**kwargs)
 
@@ -20,6 +23,9 @@ class Application:
         self.loop.run_until_complete(self.running)
 
     async def run(self):
+        # Mqtt client
+        self.mqtt_task = self.mqtt.run()
+        self.loop.create_task(self.mqtt_task)
         # Web server
         self.web_task = self.web.run()
         self.loop.create_task(self.web_task)
@@ -27,5 +33,6 @@ class Application:
     async def stop(self):
         self.log.info('stopping')
         await self.web.stop()
+        await self.mqtt.stop()
         self.running.set_result(False)
         self.log.info('stopped')

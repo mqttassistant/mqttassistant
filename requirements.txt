@@ -1,5 +1,6 @@
 fastapi>=0.70
 Jinja2>=3
 Hypercorn>=0.13
+amqtt>=0.10
 requests>=2
 coverage>=6
