@@ -113,10 +113,13 @@ class Mqtt:
 
     async def on_discovery_message(self, topic, payload):
         if payload:
-            self.discovery_message[topic] = payload
+            if not payload == self.discovery_message.get(topic, None):
+                self.discovery_message[topic] = payload
+                await self.schedule_reload()
         else:
-            del self.discovery_message[topic]
-        await self.schedule_reload()
+            if topic in self.discovery_message:
+                del self.discovery_message[topic]
+                await self.schedule_reload()
 
     async def schedule_reload(self):
         if not self.reload_scheduled:
