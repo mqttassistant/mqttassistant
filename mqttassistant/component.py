@@ -7,13 +7,13 @@ class Component:
         availability_payload_online: str = '',
         availability_payload_offline: str = '',
     ) -> None:
-        self.availability_topic: str = availability_topic
-        self.availability_payload_online: str = availability_payload_online or os.getenv('DEFAULT_AVAILABILITY_PAYLOAD_ONLINE', 'online')
-        self.availability_payload_offline: str = availability_payload_offline or os.getenv('DEFAULT_AVAILABILITY_PAYLOAD_OFFLINE', 'offline')
-        self.available: bool = False
+        self._availability_topic: str = availability_topic
+        self._availability_payload_online: str = availability_payload_online or os.getenv('DEFAULT_AVAILABILITY_PAYLOAD_ONLINE', 'online')
+        self._availability_payload_offline: str = availability_payload_offline or os.getenv('DEFAULT_AVAILABILITY_PAYLOAD_OFFLINE', 'offline')
+        self._available: bool = False
 
     def is_optimistic(self) -> bool:
-        return not bool(self.availability_topic)
+        return not bool(self._availability_topic)
 
     def is_available(self) -> bool:
-        return self.available or self.is_optimistic()
+        return self._available or self.is_optimistic()

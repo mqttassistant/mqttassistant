@@ -22,12 +22,12 @@ class ComponentTest(unittest.TestCase):
 
     def test_is_available_true(self):
         component = Component(availability_topic='availability')
-        component.available = True
+        component._available = True
         self.assertTrue(component.is_available())
 
     def test_is_available_false(self):
         component = Component(availability_topic='availability')
-        component.available = False
+        component._available = False
         self.assertFalse(component.is_available())
 
     def test_is_available_default(self):
@@ -36,18 +36,18 @@ class ComponentTest(unittest.TestCase):
 
     def test_payload_online_default(self):
         component = Component()
-        self.assertEqual(component.availability_payload_online, 'online')
+        self.assertEqual(component._availability_payload_online, 'online')
 
     def test_payload_offline_default(self):
         component = Component()
-        self.assertEqual(component.availability_payload_offline, 'offline')
+        self.assertEqual(component._availability_payload_offline, 'offline')
 
     @patch.dict(os.environ, dict(DEFAULT_AVAILABILITY_PAYLOAD_ONLINE='ON'))
     def test_payload_online_default_override(self):
         component = Component()
-        self.assertEqual(component.availability_payload_online, 'ON')
+        self.assertEqual(component._availability_payload_online, 'ON')
 
     @patch.dict(os.environ, dict(DEFAULT_AVAILABILITY_PAYLOAD_OFFLINE='OFF'))
     def test_payload_offline_default_override(self):
         component = Component()
-        self.assertEqual(component.availability_payload_offline, 'OFF')
+        self.assertEqual(component._availability_payload_offline, 'OFF')
