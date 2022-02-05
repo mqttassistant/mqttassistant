@@ -1,5 +1,6 @@
 import argparse
 import os
+from pathlib import Path
 from mqttassistant.app import Application
 
 
@@ -16,7 +17,7 @@ MQTT_DISCOVERY_TOPIC = os.getenv('MQTT_DISCOVERY_TOPIC', 'homeassistant')
 
 def main():
     parser = argparse.ArgumentParser(prog='mqttassistant', description='MqttAssistant')
-    parser.add_argument('--web-host', default=WEB_HOST)
+    parser.add_argument('--config-path', type=Path, default=Path.cwd())
     parser.add_argument('--web-port', default=WEB_PORT)
     parser.add_argument('--mqtt-host', default=MQTT_HOST)
     parser.add_argument('--mqtt-port', default=MQTT_PORT)

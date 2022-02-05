@@ -1,0 +1,7 @@
+component:
+  binary_sensor:
+    kitchen-presence:
+      state_topic: kitchen/presence/state
+  sensor:
+    garage-temperature:
+      state_topic: garage/temp

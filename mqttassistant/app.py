@@ -1,14 +1,17 @@
 import asyncio
 import signal
-from .log import get_logger
-from . import web
 from . import mqtt
+from . import web
+from .config import Config
+from .log import get_logger
 
 
 class Application:
     def __init__(self, **kwargs):
         self.log = get_logger('App')
         self.running = asyncio.Future()
+        # Config
+        self.config = Config.parse_config_path(path=kwargs['config_path'])
         # Mqtt client
         self.mqtt = mqtt.Mqtt(**kwargs)
         # Web server
