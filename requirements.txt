@@ -3,4 +3,6 @@ Jinja2>=3
 Hypercorn>=0.13
 amqtt>=0.10
 requests>=2
+PyYAML>=5
+pydantic>=1.9
 coverage>=6
