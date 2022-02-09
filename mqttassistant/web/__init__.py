@@ -1,6 +1,6 @@
 import asyncio
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.templating import Jinja2Templates
 from fastapi.routing import APIRoute
 from hypercorn.asyncio import serve
@@ -8,14 +8,22 @@ from hypercorn.config import Config
 from . import root
 from . import healthz
 from ..log import get_logger
+from .auth import Auth
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 
 class App(FastAPI):
-    def __init__(self):
+    def __init__(self, web_config=dict()):
         module_path = os.path.dirname(os.path.realpath(__file__))
+        
+        auth_config = web_config.get('auth', dict())
+        
+        self.auth = Auth(**auth_config)
+        
         super().__init__(routes=[
             APIRoute('/', root.home),
             APIRoute('/healthz', healthz.main),
+            APIRoute('/login', root.login, methods=['POST']),
         ])
         self.templates = Jinja2Templates(directory=os.path.join(module_path, 'templates'))
 
@@ -33,7 +41,7 @@ class Server:
         self.config.accesslog = self.log
         self.config.errorlog = self.log
         self.config.access_log_format = '%(h)s %(l)s %(l)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s" %(L)s'
-        self.app = App()
+        self.app = App(**kwargs)
 
     def run(self):
         return serve(

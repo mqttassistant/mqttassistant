@@ -15,6 +15,7 @@ class Application:
         # Mqtt client
         self.mqtt = mqtt.Mqtt(**kwargs)
         # Web server
+        kwargs.update('web_config', self.config)
         self.web = web.Server(**kwargs)
 
     def start(self):
