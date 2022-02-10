@@ -8,18 +8,15 @@ from hypercorn.config import Config
 from . import root
 from . import healthz
 from ..log import get_logger
-from .auth import Auth
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from ..config import Config as AppConfig
 
 
 class App(FastAPI):
-    def __init__(self, web_config=dict()):
+    def __init__(self, config=AppConfig(), **kwargs):
         module_path = os.path.dirname(os.path.realpath(__file__))
-        
-        auth_config = web_config.get('auth', dict())
-        
-        self.auth = Auth(**auth_config)
-        
+        self.config=config
+
         super().__init__(routes=[
             APIRoute('/', root.home),
             APIRoute('/healthz', healthz.main),
@@ -29,7 +26,7 @@ class App(FastAPI):
 
 
 class Server:
-    def __init__(self, web_host='0.0.0.0', web_port=8000, **kwargs):
+    def __init__(self, web_host='0.0.0.0', web_port=8000, app_config=None,**kwargs):
         self.log = get_logger('Web')
         self.host = web_host
         self.port = web_port
@@ -41,7 +38,7 @@ class Server:
         self.config.accesslog = self.log
         self.config.errorlog = self.log
         self.config.access_log_format = '%(h)s %(l)s %(l)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s" %(L)s'
-        self.app = App(**kwargs)
+        self.app = App(config=app_config, **kwargs)
 
     def run(self):
         return serve(

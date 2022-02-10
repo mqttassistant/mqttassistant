@@ -2,13 +2,14 @@ import yaml
 from pathlib import Path
 from typing import (
     Optional,
-    Type,
+    Type,List
 )
 from pydantic import (
     BaseModel,
     Extra,
 )
 from .component import ComponentConfig
+from .auth import Auth, User
 from .log import get_logger
 
 
@@ -17,6 +18,8 @@ logger = get_logger('Config')
 
 class Config(BaseModel):
     component: Optional[ComponentConfig] = ComponentConfig()
+    auth: Optional[Auth] = Auth()
+    users: Optional[List[User]] = []
 
     class Config:
         extra = Extra.forbid
@@ -27,7 +30,7 @@ class Config(BaseModel):
         files = []
         if path.is_file():
             files = [path]
-        if path.is_dir:
+        if path.is_dir():
             files = list(path.glob('*.yaml'))
         if files:
             for file in files:
