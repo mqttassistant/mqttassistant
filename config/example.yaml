@@ -5,3 +5,16 @@ component:
   sensor:
     garage-temperature:
       state_topic: garage/temp
+
+
+users:
+  - username: user1
+    password: $2b$12$XTT6OTxJSGJ0y36iOh5y7Ofy5CwCxHBsty8QWTr4UDl.ylM80ZrTy
+  - username: user2
+    password: $2b$12$78sxlut9xwDv9AJOtOWvVejqW27eBXBvVWegJBkli1RfsuDW6wq06
+
+auth:
+  secret_key: 09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7
+  algorithm: HS256
+  access_token_expire_minutes: 1
+      
