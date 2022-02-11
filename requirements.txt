@@ -5,4 +5,5 @@ amqtt>=0.10
 requests>=2
 PyYAML>=5
 pydantic>=1.9
+python_jose>=3.3.0
 coverage>=6
