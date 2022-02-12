@@ -1,6 +1,8 @@
 import asyncio
 import re
+from typing import Optional
 from amqtt import client
+from .dispatch import Signal
 from .log import get_logger
 
 
@@ -17,8 +19,9 @@ class MQTTClient(client.MQTTClient):
 
 
 class Mqtt:
-    def __init__(self, **config):
-        self.log = get_logger('Mqtt')
+    def __init__(self, topic_signal: Optional[Signal] = Signal(), **config):
+        self.logger = get_logger('Mqtt')
+        self.topic_signal = topic_signal
         # Config
         self.name = config.get('mqtt_name', 'mqttassistant')
         self.host = config.get('mqtt_host', 'localhost')
@@ -35,6 +38,10 @@ class Mqtt:
         self.discovery_topic_re = re.compile(r'^{}/(?P<component>\w+)/(?:(?P<node_id>[a-zA-Z0-9_-]+)/)?(?P<object_id>[a-zA-Z0-9_-]+)/config$'.format(self.discovery_topic))
         self.discovery_message = dict()
         self.reload_scheduled = False
+        # Subcribed topics
+        self.subscribed_topics = set()
+        self.topic_signal.connect_callback = self.topic_subscribe
+        self.topic_signal.disconnect_callback = self.topic_unsubscribe
 
     def get_client(self):
         return MQTTClient(
@@ -69,14 +76,14 @@ class Mqtt:
         )
 
     async def run(self):
-        self.log.info('Started. Server: {}'.format(self.host))
+        self.logger.info('Started. Server: {}'.format(self.host))
         return await self.connect()
 
     async def stop(self, **kwargs):
         if self.client.session.transitions.is_connected():
             await self.client.publish(self.last_will_topic, b'offline')
             await self.client.disconnect()
-        self.log.info('Stopped')
+        self.logger.info('Stopped')
 
     async def connect(self):
         await self.client.connect(**self.connect_parameters)
@@ -87,7 +94,7 @@ class Mqtt:
         # Subscribe
         discovery_topic = '{}/#'.format(self.discovery_topic)
         await self.client.subscribe([(discovery_topic, 2)])
-        self.log.info('Connected')
+        self.logger.info('Connected')
 
     def _on_message(self, topic, payload, retained):
         asyncio.create_task(self.on_message(topic, payload, retained))
@@ -102,14 +109,16 @@ class Mqtt:
                     payload = packet.payload.data.decode('utf-8')
                     await self.on_message(topic, payload)
             except Exception as error:
-                self.log.exception('read_messages', error)
+                self.logger.exception('read_messages', error)
 
     async def on_message(self, topic, payload):
-        self.log.debug('message received: {} {}'.format(topic, payload))
+        self.logger.debug('message received: {} {}'.format(topic, payload))
         # Discovery topic
         match = self.discovery_topic_re.match(topic)
         if match:
             await self.on_discovery_message(topic, payload)
+        if topic in self.subscribed_topics:
+            self.topic_signal.send(topic, payload=payload)
 
     async def on_discovery_message(self, topic, payload):
         if payload:
@@ -129,4 +138,18 @@ class Mqtt:
 
     def reload_config(self):
         self.reload_scheduled = False
-        self.log.info('Configuration reloaded')
+        self.logger.info('Configuration reloaded')
+
+    async def topic_subscribe(self, **kwargs):
+        topic = kwargs['uid']
+        self.logger.debug('topic_subscribe: {}'.format(topic))
+        if not topic in self.subscribed_topics:
+            self.subscribed_topics.add(topic)
+            asyncio.create_task(self.client.subscribe([(topic, 2)]))
+
+    async def topic_unsubscribe(self, **kwargs):
+        topic = kwargs['uid']
+        self.logger.debug('topic_unsubscribe: {}'.format(topic))
+        if topic in self.subscribed_topics:
+            self.subscribed_topics.remove(topic)
+            asyncio.create_task(self.client.unsubscribe([(topic, 2)]))
