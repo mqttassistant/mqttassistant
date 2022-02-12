@@ -1,27 +1,30 @@
 import asyncio
 import os
-from fastapi import FastAPI, Depends
+from typing import Optional
+from fastapi import FastAPI
 from fastapi.templating import Jinja2Templates
 from fastapi.routing import APIRoute
 from hypercorn.asyncio import serve
 from hypercorn.config import Config
-from . import root
 from . import healthz
-from ..log import get_logger
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from . import root
 from ..config import Config as AppConfig
+from ..log import get_logger
 
 
 class App(FastAPI):
-    def __init__(self, config=AppConfig(), **kwargs):
+    def __init__(self, config: Optional[AppConfig] = AppConfig(), **kwargs):
         module_path = os.path.dirname(os.path.realpath(__file__))
-        self.config=config
+        self.config = config
 
-        super().__init__(routes=[
-            APIRoute('/', root.home),
-            APIRoute('/healthz', healthz.main),
-            APIRoute('/login', root.login, methods=['POST']),
-        ])
+        super().__init__(
+            routes=[
+                APIRoute('/', root.home),
+                APIRoute('/healthz', healthz.main),
+                APIRoute('/login', root.login, methods=['POST']),
+            ],
+            **kwargs
+        )
         self.templates = Jinja2Templates(directory=os.path.join(module_path, 'templates'))
 
 
