@@ -95,6 +95,9 @@ class Mqtt:
         discovery_topic = '{}/#'.format(self.discovery_topic)
         await self.client.subscribe([(discovery_topic, 2)])
         self.logger.info('Connected')
+        # Subscribed topics
+        for topic in self.subscribed_topics:
+            await self.client.subscribe([(topic, 2)])
 
     def _on_message(self, topic, payload, retained):
         asyncio.create_task(self.on_message(topic, payload, retained))
@@ -145,11 +148,13 @@ class Mqtt:
         self.logger.debug('topic_subscribe: {}'.format(topic))
         if not topic in self.subscribed_topics:
             self.subscribed_topics.add(topic)
-            asyncio.create_task(self.client.subscribe([(topic, 2)]))
+            if self.client._connected_state.is_set():
+                asyncio.create_task(self.client.subscribe([(topic, 2)]))
 
     async def topic_unsubscribe(self, **kwargs):
         topic = kwargs['uid']
         self.logger.debug('topic_unsubscribe: {}'.format(topic))
         if topic in self.subscribed_topics:
             self.subscribed_topics.remove(topic)
-            asyncio.create_task(self.client.unsubscribe([(topic, 2)]))
+            if self.client._connected_state.is_set():
+                asyncio.create_task(self.client.unsubscribe([(topic, 2)]))
