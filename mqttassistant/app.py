@@ -22,7 +22,7 @@ class Application:
         # Mqtt client
         self.mqtt = mqtt.Mqtt(topic_signal=self.mqtt_topic_signal, **kwargs)
         # Web server
-        self.web = web.Server(app_config=self.config, **kwargs)
+        self.web = web.Server(app_config=self.config, mqtt_topic_signal=self.mqtt_topic_signal, **kwargs)
 
     def start(self):
         self.log.info('started')

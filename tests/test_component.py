@@ -8,7 +8,7 @@ from mqttassistant.component.base import (
 )
 
 
-class ComponentTest(unittest.TestCase):
+class ComponentTest(unittest.IsolatedAsyncioTestCase):
     def test_subscribe_topics_no_availability_topic(self):
         component = Component()
         self.assertEqual(component._subscribe_topics, [])
@@ -64,8 +64,31 @@ class ComponentTest(unittest.TestCase):
         component = Component()
         self.assertEqual(component.availability_payload_offline, 'OFF')
 
+    def test_get_subscribe_topics_empty(self):
+        component = Component()
+        self.assertEqual(component.get_subscribe_topics(), [])
 
-class SensorTest(unittest.TestCase):
+    def test_get_subscribe_topics_availability(self):
+        component = Component(availability_topic='availability')
+        self.assertEqual(component.get_subscribe_topics(), ['availability'])
+
+    async def test_on_mqtt_message_received(self):
+        component = Component(availability_topic='availability')
+        await component._on_mqtt_message_received('availability', 'online')
+        self.assertTrue(component.is_available())
+
+    async def test_availability_online(self):
+        component = Component(availability_topic='availability')
+        await component.on_mqtt_message_received('availability', 'online')
+        self.assertTrue(component.is_available())
+
+    async def test_availability_offline(self):
+        component = Component(availability_topic='availability')
+        await component.on_mqtt_message_received('availability', 'offline')
+        self.assertFalse(component.is_available())
+
+
+class SensorTest(unittest.IsolatedAsyncioTestCase):
     def test_state_empty(self):
         component = Sensor()
         self.assertEqual(component.state, None)
@@ -78,9 +101,31 @@ class SensorTest(unittest.TestCase):
         component = Sensor(availability_topic='available/state', state_topic='state')
         self.assertEqual(component._subscribe_topics, ['available/state', 'state'])
 
+    def test_get_subscribe_topics_availability_state(self):
+        component = Sensor(availability_topic='availability', state_topic='state')
+        self.assertEqual(component.get_subscribe_topics(), ['availability', 'state'])
+
+    def test_get_subscribe_topics_state(self):
+        component = Sensor(state_topic='state')
+        self.assertEqual(component.get_subscribe_topics(), ['state'])
+
+    async def test_availability_online(self):
+        component = Sensor(availability_topic='availability')
+        await component.on_mqtt_message_received('availability', 'online')
+        self.assertTrue(component.is_available())
+
+    async def test_availability_offline(self):
+        component = Sensor(availability_topic='availability')
+        await component.on_mqtt_message_received('availability', 'offline')
+        self.assertFalse(component.is_available())
+
+    async def test_event_state(self):
+        component = Sensor(state_topic='state')
+        await component.on_mqtt_message_received('state', '42')
+        self.assertEqual(component.state, 42)
 
 
-class BinarySensorTest(unittest.TestCase):
+class BinarySensorTest(unittest.IsolatedAsyncioTestCase):
     def test_subscribe_topics_availability_status(self):
         component = BinarySensor(availability_topic='available/state', state_topic='state')
         self.assertEqual(component._subscribe_topics, ['available/state', 'state'])
@@ -117,3 +162,27 @@ class BinarySensorTest(unittest.TestCase):
         component = BinarySensor(state=False)
         self.assertFalse(component.is_on())
         self.assertTrue(component.is_off())
+
+    def test_get_subscribe_topics_availability_state(self):
+        component = BinarySensor(availability_topic='availability', state_topic='state')
+        self.assertEqual(component.get_subscribe_topics(), ['availability', 'state'])
+
+    async def test_availability_online(self):
+        component = BinarySensor(availability_topic='availability')
+        await component.on_mqtt_message_received('availability', 'online')
+        self.assertTrue(component.is_available())
+
+    async def test_availability_offline(self):
+        component = BinarySensor(availability_topic='availability')
+        await component.on_mqtt_message_received('availability', 'offline')
+        self.assertFalse(component.is_available())
+
+    async def test_event_on(self):
+        component = BinarySensor(state_topic='state')
+        await component.on_mqtt_message_received('state', 'ON')
+        self.assertTrue(component.state)
+
+    async def test_event_off(self):
+        component = BinarySensor(state_topic='state')
+        await component.on_mqtt_message_received('state', 'OFF')
+        self.assertFalse(component.state)
