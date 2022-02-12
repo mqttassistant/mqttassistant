@@ -32,6 +32,19 @@ class Component(BaseModel):
     def is_available(self) -> bool:
         return self._available or self.is_optimistic()
 
+    def get_subscribe_topics(self):
+        return self._subscribe_topics
+
+    async def _on_mqtt_message_received(self, subject, payload):
+        await self.on_mqtt_message_received(subject, payload)
+
+    async def on_mqtt_message_received(self, topic, payload):
+        if topic == self.availability_topic:
+            if payload == self.availability_payload_online:
+                self._available = True
+            if payload == self.availability_payload_offline:
+                self._available = False
+
 
 class Sensor(Component):
     state_topic: Optional[str] = ''
@@ -41,6 +54,12 @@ class Sensor(Component):
         super().__init__(*args, **kwargs)
         if self.state_topic:
             self._subscribe_topics.append(self.state_topic)
+
+    async def on_mqtt_message_received(self, topic, payload):
+        if topic == self.state_topic:
+            self.state = float(payload)
+        else:
+            await super().on_mqtt_message_received(topic, payload)
 
 
 class BinarySensor(Sensor):
@@ -53,3 +72,12 @@ class BinarySensor(Sensor):
 
     def is_off(self):
         return not bool(self.state)
+
+    async def on_mqtt_message_received(self, topic, payload):
+        if topic == self.state_topic:
+            if payload == self.state_payload_on:
+                self.state = True
+            if payload == self.state_payload_off:
+                self.state = False
+        else:
+            await super().on_mqtt_message_received(topic, payload)

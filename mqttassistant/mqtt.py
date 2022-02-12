@@ -121,7 +121,7 @@ class Mqtt:
         if match:
             await self.on_discovery_message(topic, payload)
         if topic in self.subscribed_topics:
-            self.topic_signal.send(topic, payload=payload)
+            await self.topic_signal.send(topic, payload=payload)
 
     async def on_discovery_message(self, topic, payload):
         if payload:
@@ -144,7 +144,7 @@ class Mqtt:
         self.logger.info('Configuration reloaded')
 
     async def topic_subscribe(self, **kwargs):
-        topic = kwargs['uid']
+        topic = kwargs['subject']
         self.logger.debug('topic_subscribe: {}'.format(topic))
         if not topic in self.subscribed_topics:
             self.subscribed_topics.add(topic)
@@ -152,7 +152,7 @@ class Mqtt:
                 asyncio.create_task(self.client.subscribe([(topic, 2)]))
 
     async def topic_unsubscribe(self, **kwargs):
-        topic = kwargs['uid']
+        topic = kwargs['subject']
         self.logger.debug('topic_unsubscribe: {}'.format(topic))
         if topic in self.subscribed_topics:
             self.subscribed_topics.remove(topic)

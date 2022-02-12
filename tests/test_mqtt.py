@@ -9,19 +9,19 @@ class MqttTest(unittest.IsolatedAsyncioTestCase):
         signal = Signal()
         mqtt = Mqtt(topic_signal=signal)
         with self.assertLogs('Mqtt', level='DEBUG') as cm:
-            await signal.connect('sensor/state', callback=Callback())
+            await signal.connect('sensor', subject='sensor/state', callback=Callback())
             self.assertEqual(mqtt.subscribed_topics, {'sensor/state'})
             self.assertEqual(cm.output, [
                 'DEBUG:Mqtt:topic_subscribe: sensor/state',
             ])
             # connecting again does not add another item
-            await signal.connect('sensor/state', callback=Callback())
+            await signal.connect('sensor', subject='sensor/state', callback=Callback())
             self.assertEqual(mqtt.subscribed_topics, {'sensor/state'})
             self.assertEqual(cm.output, [
                 'DEBUG:Mqtt:topic_subscribe: sensor/state',
             ])
             # connecting another topic does
-            await signal.connect('another/state', callback=Callback())
+            await signal.connect('another', subject='another/state', callback=Callback())
             self.assertEqual(mqtt.subscribed_topics, {'sensor/state', 'another/state'})
             self.assertEqual(cm.output, [
                 'DEBUG:Mqtt:topic_subscribe: sensor/state',
@@ -31,16 +31,16 @@ class MqttTest(unittest.IsolatedAsyncioTestCase):
     async def test_topic_signal_disconnect(self):
         signal = Signal()
         mqtt = Mqtt(topic_signal=signal)
-        await signal.connect('sensor/state', callback=Callback())
-        await signal.connect('another/state', callback=Callback())
+        await signal.connect('sensor', subject='sensor/state', callback=Callback())
+        await signal.connect('another', subject='another/state', callback=Callback())
         with self.assertLogs('Mqtt', level='DEBUG') as cm:
-            await signal.disconnect('sensor/state')
+            await signal.disconnect('sensor', subject='sensor/state')
             self.assertEqual(mqtt.subscribed_topics, {'another/state'})
             self.assertEqual(cm.output, [
                 'DEBUG:Mqtt:topic_unsubscribe: sensor/state',
             ])
             # disconnecting again does not change anything
-            await signal.disconnect('sensor/state')
+            await signal.disconnect('sensor', subject='sensor/state')
             self.assertEqual(mqtt.subscribed_topics, {'another/state'})
             self.assertEqual(cm.output, [
                 'DEBUG:Mqtt:topic_unsubscribe: sensor/state',
