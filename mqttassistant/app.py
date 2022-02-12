@@ -3,6 +3,7 @@ import signal
 from . import mqtt
 from . import web
 from .config import Config
+from .dispatch import Signal
 from .log import get_logger
 
 
@@ -12,8 +13,10 @@ class Application:
         self.running = asyncio.Future()
         # Config
         self.config = Config.parse_config_path(path=kwargs['config_path'])
+        # Signals
+        self.mqtt_topic_signal = Signal()
         # Mqtt client
-        self.mqtt = mqtt.Mqtt(**kwargs)
+        self.mqtt = mqtt.Mqtt(topic_signal=self.mqtt_topic_signal, **kwargs)
         # Web server
         self.web = web.Server(app_config=self.config, **kwargs)
 
