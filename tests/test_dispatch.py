@@ -28,6 +28,18 @@ class SignalTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(signal.callback, dict())
         self.assertEqual(signal.subject_callback, dict(subject=dict(abc=callback)))
 
+    async def test_connect_subject_2(self):
+        callback = Callback()
+        signal = Signal()
+        connected = await signal.connect('abc', callback, subject='s2')
+        self.assertTrue(connected)
+        self.assertEqual(signal.callback, dict())
+        self.assertEqual(signal.subject_callback, dict(s2=dict(abc=callback)))
+        connected = await signal.connect('abc', callback, subject='s2')
+        self.assertFalse(connected)
+        self.assertEqual(signal.callback, dict())
+        self.assertEqual(signal.subject_callback, dict(s2=dict(abc=callback)))
+
     async def test_disconnect(self):
         callback = Callback()
         signal = Signal()
