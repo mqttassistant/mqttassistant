@@ -7,6 +7,7 @@ from .utils import get_current_user, get_user
 async def home(request: Request, current_user: User = Depends(get_current_user)):
     return request.app.templates.TemplateResponse('home.html', dict(request=request))
 
+
 async def login(request: Request, user_form: User):
     e = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -24,4 +25,3 @@ async def login(request: Request, user_form: User):
         raise e
     token = auth.encode_token(user_verified)
     return dict(token=token)
-    

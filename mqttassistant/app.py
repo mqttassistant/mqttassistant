@@ -5,6 +5,10 @@ from . import web
 from .config import Config
 from .dispatch import Signal
 from .log import get_logger
+from .warn import configure_warnings
+
+
+configure_warnings()
 
 
 class Application:
