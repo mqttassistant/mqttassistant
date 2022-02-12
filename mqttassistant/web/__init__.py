@@ -26,6 +26,12 @@ class App(FastAPI):
             **kwargs
         )
         self.templates = Jinja2Templates(directory=os.path.join(module_path, 'templates'))
+        # ------------------------------------------------------
+        # TO BE REMOVED
+        # ------------------------------------------------------
+        from . import test
+        self.include_router(test.router)
+        # ------------------------------------------------------
 
 
 class Server:
