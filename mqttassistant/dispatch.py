@@ -17,7 +17,7 @@ class Signal:
         assert callable(callback)
         connected = False
         if subject:
-            self.subject_callback[subject] = self.subject_callback.get('subject', dict())
+            self.subject_callback[subject] = self.subject_callback.get(subject, dict())
             if uid not in self.subject_callback[subject]:
                 self.subject_callback[subject][uid] = callback
                 connected = True
