@@ -20,9 +20,9 @@ class MQTTClient(client.MQTTClient):
 
 class Mqtt:
     def __init__(self, topic_signal: Optional[Signal] = Signal(), **config):
-        self.logger = get_logger('Mqtt')
         self.topic_signal = topic_signal
         # Config
+        self.logger = get_logger('Mqtt', level=config.get('log_level', 'INFO'))
         self.name = config.get('mqtt_name', 'mqttassistant')
         self.host = config.get('mqtt_host', 'localhost')
         self.port = config.get('mqtt_port', 1883)
