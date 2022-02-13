@@ -38,7 +38,7 @@ class App(FastAPI):
 
 class Server:
     def __init__(self, web_host='0.0.0.0', web_port=8000, app_config: Optional[AppConfig] = AppConfig(), mqtt_topic_signal: Optional[AppConfig] = Signal(), **kwargs):
-        self.log = get_logger('Web')
+        self.logger = get_logger('Web', level=kwargs.get('log_level', 'INFO'))
         self.host = web_host
         self.port = web_port
         # Hypercorn
@@ -46,8 +46,8 @@ class Server:
         self.shutdown_event = asyncio.Event()
         self.config = Config()
         self.config.bind = ['{}:{}'.format(self.host, self.port)]
-        self.config.accesslog = self.log
-        self.config.errorlog = self.log
+        self.config.accesslog = self.logger
+        self.config.errorlog = self.logger
         self.config.access_log_format = '%(h)s %(l)s %(l)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s" %(L)s'
         self.app = App(config=app_config, mqtt_topic_signal=mqtt_topic_signal, **kwargs)
 
@@ -59,4 +59,4 @@ class Server:
         )
 
     async def stop(self):
-        self.log.info('stopped')
+        self.logger.info('stopped')
