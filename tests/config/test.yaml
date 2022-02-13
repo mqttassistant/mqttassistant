@@ -1,0 +1,4 @@
+component:
+  sensor:
+    temperature:
+      state_topic: temperature/state

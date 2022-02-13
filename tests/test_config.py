@@ -1,9 +1,40 @@
 import unittest
+from pathlib import Path
 from mqttassistant.auth import Auth
 from mqttassistant.config import Config
 
+
 class ConfigTest(unittest.TestCase):
-    
+    def test_parse_config_path_single_file(self):
+        path = Path(__file__).parent / 'config' / 'test.yaml'
+        with self.assertLogs('Config', level='INFO') as cm:
+            config = Config.parse_config_path(path=path)
+            self.assertEqual(len(cm.output), 1)
+            self.assertIn('INFO:Config:Parsing', cm.output[0])
+        sensor = config.component.sensor['temperature']
+        self.assertEqual(sensor.name, 'temperature')
+        self.assertEqual(sensor.group, 'sensor')
+        self.assertEqual(sensor.state_topic, 'temperature/state')
+
+    def test_parse_config_path_directory(self):
+        path = Path(__file__).parent / 'config'
+        with self.assertLogs('Config', level='INFO') as cm:
+            config = Config.parse_config_path(path=path)
+            self.assertEqual(len(cm.output), 1)
+            self.assertIn('INFO:Config:Parsing', cm.output[0])
+        sensor = config.component.sensor['temperature']
+        self.assertEqual(sensor.name, 'temperature')
+        self.assertEqual(sensor.group, 'sensor')
+        self.assertEqual(sensor.state_topic, 'temperature/state')
+
+    def test_parse_config_path_directory_empty(self):
+        path = Path(__file__).parent
+        with self.assertLogs('Config', level='WARNING') as cm:
+            config = Config.parse_config_path(path=path)
+            self.assertEqual(len(cm.output), 1)
+            self.assertIn('WARNING:Config:No config files found', cm.output[0])
+        self.assertEqual(config.component.sensor, dict())
+
     def test_user_config(self):
         config = dict(users=[
             dict(username='user1', password='hashed_passwd1'),
