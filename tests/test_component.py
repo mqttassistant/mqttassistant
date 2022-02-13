@@ -6,9 +6,28 @@ from mqttassistant.component.base import (
     Component,
     Sensor,
 )
+from mqttassistant.component.config import ComponentConfig
+
+
+class ComponentConfigTest(unittest.TestCase):
+    def test_names(self):
+        sensor = Sensor()
+        self.assertEqual(sensor.name, None)
+        ComponentConfig(sensor=dict(myname=sensor))
+        self.assertEqual(sensor.name, 'myname')
 
 
 class ComponentTest(unittest.IsolatedAsyncioTestCase):
+    def test_group(self):
+        component = Component()
+        self.assertEqual(component.group, None)
+
+    def test_name(self):
+        component = Component()
+        self.assertEqual(component.name, None)
+        component.set_name('component-name')
+        self.assertEqual(component.name, 'component-name')
+
     def test_subscribe_topics_no_availability_topic(self):
         component = Component()
         self.assertEqual(component._subscribe_topics, [])
@@ -89,6 +108,16 @@ class ComponentTest(unittest.IsolatedAsyncioTestCase):
 
 
 class SensorTest(unittest.IsolatedAsyncioTestCase):
+    def test_group(self):
+        component = Sensor()
+        self.assertEqual(component.group, 'sensor')
+
+    def test_name(self):
+        component = Sensor()
+        self.assertEqual(component.name, None)
+        component.set_name('component-name')
+        self.assertEqual(component.name, 'component-name')
+
     def test_state_empty(self):
         component = Sensor()
         self.assertEqual(component.state, None)
@@ -126,6 +155,16 @@ class SensorTest(unittest.IsolatedAsyncioTestCase):
 
 
 class BinarySensorTest(unittest.IsolatedAsyncioTestCase):
+    def test_group(self):
+        component = BinarySensor()
+        self.assertEqual(component.group, 'binary_sensor')
+
+    def test_name(self):
+        component = BinarySensor()
+        self.assertEqual(component.name, None)
+        component.set_name('component-name')
+        self.assertEqual(component.name, 'component-name')
+
     def test_subscribe_topics_availability_status(self):
         component = BinarySensor(availability_topic='available/state', state_topic='state')
         self.assertEqual(component._subscribe_topics, ['available/state', 'state'])

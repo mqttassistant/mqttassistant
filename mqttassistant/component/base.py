@@ -14,6 +14,8 @@ class Component(BaseModel):
     availability_topic: Optional[str] = ''
     availability_payload_online: Optional[str] = Field(default_factory=lambda: os.getenv('DEFAULT_AVAILABILITY_PAYLOAD_ONLINE', 'online'))
     availability_payload_offline: Optional[str] = Field(default_factory=lambda: os.getenv('DEFAULT_AVAILABILITY_PAYLOAD_OFFLINE', 'offline'))
+    group: Optional[str] = None
+    name: Optional[str] = None
     _available: Optional[bool] = False
     _subscribe_topics: Optional[List[str]] = []
 
@@ -35,6 +37,9 @@ class Component(BaseModel):
     def get_subscribe_topics(self):
         return self._subscribe_topics
 
+    def set_name(self, name: str):
+        self.name = name
+
     async def _on_mqtt_message_received(self, subject, payload):
         await self.on_mqtt_message_received(subject, payload)
 
@@ -47,6 +52,7 @@ class Component(BaseModel):
 
 
 class Sensor(Component):
+    group: Optional[str] = 'sensor'
     state_topic: Optional[str] = ''
     state: Optional[float] = None
 
@@ -63,6 +69,7 @@ class Sensor(Component):
 
 
 class BinarySensor(Sensor):
+    group: Optional[str] = 'binary_sensor'
     state_payload_on: Optional[str] = Field(default_factory=lambda: os.getenv('DEFAULT_STATE_PAYLOAD_ON', 'ON'))
     state_payload_off: Optional[str] = Field(default_factory=lambda: os.getenv('DEFAULT_STATE_PAYLOAD_OFF', 'OFF'))
     state: Optional[bool] = None
