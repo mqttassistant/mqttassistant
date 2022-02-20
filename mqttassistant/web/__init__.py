@@ -2,6 +2,7 @@ import asyncio
 import os
 from typing import Optional
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
 from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
@@ -19,6 +20,7 @@ class App(FastAPI):
         module_path = os.path.dirname(os.path.realpath(__file__))
         self.config = config
         self.mqtt_topic_signal = mqtt_topic_signal
+        cors_origins = kwargs.pop('cors_origins', [])
 
         super().__init__(
             routes=[
@@ -29,6 +31,14 @@ class App(FastAPI):
         )
         if ui_path:
             self.mount('/', StaticFiles(directory=ui_path, html=True), name='ui')
+        if cors_origins:
+            self.add_middleware(
+                CORSMiddleware,
+                allow_origins=cors_origins,
+                allow_credentials=True,
+                allow_methods=['*'],
+                allow_headers=['*'],
+            )
         self.templates = Jinja2Templates(directory=os.path.join(module_path, 'templates'))
         # ------------------------------------------------------
         # TO BE REMOVED
