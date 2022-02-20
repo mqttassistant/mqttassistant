@@ -14,6 +14,10 @@ MQTT_NAME = os.getenv('MQTT_NAME', 'mqttassistant')
 MQTT_KEEP_ALIVE = int(os.getenv('MQTT_KEEP_ALIVE', '5'))
 MQTT_DISCOVERY_TOPIC = os.getenv('MQTT_DISCOVERY_TOPIC', 'homeassistant')
 UI_PATH = os.getenv('UI_PATH', Path(__file__).parent.parent / 'ui' / 'build' / 'web')
+CORS_ORIGINS = []
+cors_origin = os.getenv('CORS_ORIGIN', None)
+if cors_origin:
+    CORS_ORIGINS = [cors_origin]
 LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
 
 
@@ -29,6 +33,7 @@ def main():
     parser.add_argument('--mqtt-keep-alive', default=MQTT_KEEP_ALIVE)
     parser.add_argument('--mqtt-discovery-topic', default=MQTT_DISCOVERY_TOPIC)
     parser.add_argument('--ui-path', default=UI_PATH)
+    parser.add_argument('--cors-origins', nargs='+', default=CORS_ORIGINS)
     parser.add_argument('--log-level', default=LOG_LEVEL)
     kwargs = vars(parser.parse_args())
     app = Application(**kwargs)
