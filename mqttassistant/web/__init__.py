@@ -4,6 +4,7 @@ from typing import Optional
 from fastapi import FastAPI
 from fastapi.templating import Jinja2Templates
 from fastapi.routing import APIRoute
+from fastapi.staticfiles import StaticFiles
 from hypercorn.asyncio import serve
 from hypercorn.config import Config
 from . import healthz
@@ -14,19 +15,20 @@ from ..log import get_logger
 
 
 class App(FastAPI):
-    def __init__(self, config: Optional[AppConfig] = AppConfig(), mqtt_topic_signal: Optional[AppConfig] = Signal(), **kwargs):
+    def __init__(self, config: Optional[AppConfig] = AppConfig(), mqtt_topic_signal: Optional[AppConfig] = Signal(), ui_path: str = '', **kwargs):
         module_path = os.path.dirname(os.path.realpath(__file__))
         self.config = config
         self.mqtt_topic_signal = mqtt_topic_signal
 
         super().__init__(
             routes=[
-                APIRoute('/', root.home),
                 APIRoute('/healthz', healthz.main),
                 APIRoute('/login', root.login, methods=['POST']),
             ],
             **kwargs
         )
+        if ui_path:
+            self.mount('/', StaticFiles(directory=ui_path, html=True), name='ui')
         self.templates = Jinja2Templates(directory=os.path.join(module_path, 'templates'))
         # ------------------------------------------------------
         # TO BE REMOVED

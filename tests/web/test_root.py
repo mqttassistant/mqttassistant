@@ -14,27 +14,14 @@ app_config = dict(
 client = TestClient(App(config=Config.parse_obj(app_config)))
 
 
-class RootTest(unittest.TestCase):
-    def test_home_no_login(self):
-        response = client.get('/')
-        self.assertEqual(response.status_code, 401)
-        self.assertEqual(response.json(), {'detail': 'Not authenticated'})
-
-    def test_home_ok(self):
-        response = client.post('/login', json=dict(username='user', password='password'))
-        token = response.json()['token']
-        response = client.get('/', headers={"Authorization": "Bearer {}".format(token)})
-        self.assertEqual(response.status_code, 200)
-
-
 class LoginTest(unittest.TestCase):
-  
+
     def test_api_login_ok(self):
         response = client.post('/login', json=dict(username='user', password='password'))
         self.assertEqual(response.status_code, 200)
         self.assertIsInstance(response.json(), dict)
         self.assertIsInstance(response.json()['token'], str)
-        
+
     def test_api_login_bad_password(self):
         response = client.post('/login', json=dict(username='user', password='bad_password'))
         self.assertEqual(response.status_code, 401)

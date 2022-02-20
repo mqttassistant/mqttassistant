@@ -1,11 +1,7 @@
-from fastapi import Request, status, HTTPException, Depends
+from fastapi import Request, status, HTTPException
 
 from ..auth import  User
-from .utils import get_current_user, get_user
-
-
-async def home(request: Request, current_user: User = Depends(get_current_user)):
-    return request.app.templates.TemplateResponse('home.html', dict(request=request))
+from .utils import get_user
 
 
 async def login(request: Request, user_form: User):
