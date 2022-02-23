@@ -29,6 +29,12 @@ class App(FastAPI):
             ],
             **kwargs
         )
+        # ------------------------------------------------------
+        # TO BE REMOVED
+        # ------------------------------------------------------
+        from . import test
+        self.include_router(test.router)
+        # ------------------------------------------------------
         if ui_path:
             self.mount('/', StaticFiles(directory=ui_path, html=True), name='ui')
         if cors_origins:
@@ -40,12 +46,6 @@ class App(FastAPI):
                 allow_headers=['*'],
             )
         self.templates = Jinja2Templates(directory=os.path.join(module_path, 'templates'))
-        # ------------------------------------------------------
-        # TO BE REMOVED
-        # ------------------------------------------------------
-        from . import test
-        self.include_router(test.router)
-        # ------------------------------------------------------
 
 
 class Server:
